@@ -1,0 +1,174 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+	<title>Canvas Animation</title>
+	<link rel="stylesheet" type="text/css" href="stylesheet.css">
+</head>
+<body>
+	<canvas id="myCanvas"></canvas>
+
+	<script>
+		//Set canvas properties
+		var canvas = document.getElementById('myCanvas');
+		var canvasWidth = window.innerWidth - 20;
+		var canvasHeight = window.innerHeight - 20;
+		canvas.width = canvasWidth;
+		canvas.height = canvasHeight;
+		// canvas.style.backgroundColor = "#CCFFFF";
+
+		//Get HTML5 Canvas context
+		var context = canvas.getContext("2d");
+
+		//Initialise Grass object
+		var grass = {
+			width: canvasWidth,
+			height: 250,
+			x: 0
+		};
+		grass.y = canvasHeight - grass.height;
+
+		//Initialise Worm object
+		var worm = {
+			width: 50,
+			height: 20,
+			x: 200
+		};
+		worm.y = grass.y - worm.height;
+
+		//Initialise Sun object
+		var sun = {
+			radius: 50,
+			x: canvasWidth - 100,
+			y: 100
+		};
+
+		//Preparing animation frame
+		var requestAnimationFrame =  
+        	window.requestAnimationFrame ||
+        	window.webkitRequestAnimationFrame ||
+        	window.mozRequestAnimationFrame ||
+        	window.msRequestAnimationFrame ||
+        	window.oRequestAnimationFrame ||
+        	function(callback) {
+          		return setTimeout(callback, 1);
+        	};
+
+        //Render Grass object
+		function drawGrass() {
+			context.fillStyle = "#009933";
+			context.fillRect(grass.x, grass.y, grass.width, grass.height);
+		}
+
+		//Render Worm object
+		function drawWorm() {
+			context.fillStyle = "#993300";
+			context.fillRect(worm.x, worm.y, worm.width, worm.height);
+		}
+
+		//Render Sun object
+		function drawSun(color) {
+			context.beginPath();
+			context.arc(sun.x, sun.y, sun.radius, 0, 2 * Math.PI, false);
+			context.fillStyle = color;
+			context.fill();
+			context.strokeStyle = "rgba(0, 0, 0, 0)";
+			context.stroke();
+		}
+
+		var speed = 5.0;
+
+		var wormStartPoint = 200;
+		var wormEndPoint = canvasWidth - worm.width - 200;
+		var wormDX = 2;
+
+      	function animateWorm() {
+      		//Clear space in canvas previously occupied by Worm object
+  			context.clearRect(worm.x, worm.y, worm.width, worm.height);
+
+  			worm.x += wormDX * speed;
+
+  			if(worm.x > wormEndPoint || worm.x < wormStartPoint)
+  				wormDX = -wormDX;
+
+  			//Redraw Worm object
+  			drawWorm();
+      	}
+
+      	var sunStartPointX = canvasWidth - 100;
+      	var sunEndPointX = 100;
+      	var sunStartPointY = sun.y;
+      	var sunEndPointY = canvasHeight - 100;
+      	var sunDX = -0.5;
+      	var tempDX = sunDX;
+      	var sunDY = 1;
+      	var tempDY = sunDY;
+      	var sunColor = "yellow"
+
+      	function animateSun() {
+      		//Clear space in canvas previously occupied by Sun object
+      		context.clearRect(sun.x - sun.radius, sun.y - sun.radius, sun.x + sun.radius, sun.y + sun.radius);
+
+  			sun.x += sunDX;
+
+  			if(sun.x < sunEndPointX) {
+  				sunDX = 0;
+  				if(sunDY == 0)
+  					sunDY = tempDY;
+  				sun.y += sunDY;
+  				if(sun.y == sunEndPointY) {
+  					sunColor = "white";
+  					canvas.style.backgroundColor = "#000099";
+  					sunDY = -sunDY;
+  				}
+  				if(sun.y == sunStartPointY) {
+  					sunDY = 0;
+  					if(sunDX == 0)
+  						sunDX = -tempDX;
+  					else
+  						sunDX = -sunDX;
+  				}
+  			}
+  			if(sun.x > sunStartPointX) {
+  				sunDX = 0;
+  				if(sunDY == 0)
+  					sunDY = tempDY;
+  				sun.y += sunDY;
+  				if(sun.y == sunEndPointY) {
+  					sunColor = "yellow";
+  					canvas.style.backgroundColor = "#CCFFFF";
+  					sunDY = -sunDY;
+  				}
+  				if(sun.y == sunStartPointY) {
+  					sunDY = 0;
+  					if(sunDX == 0)
+  						sunDX = tempDX;
+  					else
+  						sunDX = sunDX;
+  				}
+  			}
+
+  			//Redraw Sun object
+  			drawSun(sunColor);
+
+  			drawGrass();
+      		
+  			//Call this function every frame
+  			requestAnimationFrame(animateSun);
+      	}
+
+      	function animate() {
+      		//Delay the start of the drawGrass and animateSun function by 1000 ms or 1 s
+	      	setTimeout(function() {
+	      		animateSun();
+	      	}, 500);
+
+      		//Call the animateWorm function every 1000 ms or 1 s
+	      	setInterval(function() {
+	      		animateWorm();
+	      	}, 500);
+      	}
+
+      	animate();
+	</script>
+</body>
+</html>
